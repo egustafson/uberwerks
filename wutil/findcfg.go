@@ -2,6 +2,7 @@ package wutil
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -21,9 +22,24 @@ type ConfigPaths struct {
 	UserConfigDir    string
 }
 
-func FindConfig(basename string, opts ...ConfigPathsOption) string {
+func LocateConfig(basename string, opts ...ConfigPathsOption) string {
 
-	return ""
+	searchPath := ConfigSearchPath(basename, opts...)
+
+	for _, cpath := range searchPath {
+		_, err := os.Stat(cpath)
+		if err != nil {
+			continue // there's no file at cpath
+		}
+		f, err := os.Open(cpath)
+		if err != nil {
+			log.Printf("Could not open for reading: %s: %s", cpath, err)
+			continue // the file is unusable, keep trying
+		}
+		f.Close()
+		return cpath
+	}
+	return "" // empty string ==> no suitable config file located
 }
 
 func WithProfile(profile string) ConfigPathsOption {

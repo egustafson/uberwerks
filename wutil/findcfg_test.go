@@ -12,11 +12,11 @@ import (
 
 // ExampleFindConfig demonstrates locating a configuration file for a
 // program named 'appctl'
-func ExampleFindConfig() {
-	_ = wutil.FindConfig("appctl")
+func ExampleLocateConfig() {
+	_ = wutil.LocateConfig("app-name")
 }
 
-func TestFindConfig(t *testing.T) {
+func TestLocateConfig(t *testing.T) {
 	//
 	// TODO
 	//
