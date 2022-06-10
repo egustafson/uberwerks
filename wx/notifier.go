@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-type Notice interface{}
+type NotifyCallbackFn[Notice interface{}] func(notice Notice)
 
-type NotifyCallbackFn func(notice Notice)
-
-type Notifier interface {
+type Notifier[Notice interface{}] interface {
 	Listener(ctx context.Context) <-chan Notice
-	Callback(ctx context.Context, cb NotifyCallbackFn)
+	Callback(ctx context.Context, cb NotifyCallbackFn[Notice])
 
 	Notify(notice Notice)
 	Close()
@@ -20,24 +18,24 @@ type Notifier interface {
 
 // --  Basic Notifier Impl  ------------------------------------------
 
-type notifyReceiver struct {
+type notifyReceiver[Notice interface{}] struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	ch     chan<- Notice
 }
 
-type notifier struct {
+type notifier[Notice interface{}] struct {
 	lock      sync.Mutex
-	receivers map[*notifyReceiver]struct{}
+	receivers map[*notifyReceiver[Notice]]struct{}
 }
 
-func NewNotifier() Notifier {
-	return &notifier{
-		receivers: make(map[*notifyReceiver]struct{}),
+func NewNotifier[Notice interface{}]() Notifier[Notice] {
+	return &notifier[Notice]{
+		receivers: make(map[*notifyReceiver[Notice]]struct{}),
 	}
 }
 
-func (n *notifier) Close() {
+func (n *notifier[Notice]) Close() {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
@@ -48,7 +46,7 @@ func (n *notifier) Close() {
 	}
 }
 
-func (n *notifier) Notify(notice Notice) {
+func (n *notifier[Notice]) Notify(notice Notice) {
 	const timeout = 50 * time.Microsecond
 	n.lock.Lock()
 	defer n.lock.Unlock()
@@ -80,10 +78,10 @@ func (n *notifier) Notify(notice Notice) {
 	}
 }
 
-func (n *notifier) Listener(ctx context.Context) <-chan Notice {
+func (n *notifier[Notice]) Listener(ctx context.Context) <-chan Notice {
 	ctx, cancel := context.WithCancel(ctx)
 	ch := make(chan Notice, 1)
-	recv := &notifyReceiver{
+	recv := &notifyReceiver[Notice]{
 		ctx:    ctx,
 		cancel: cancel,
 		ch:     ch,
@@ -95,7 +93,7 @@ func (n *notifier) Listener(ctx context.Context) <-chan Notice {
 	return ch
 }
 
-func (n *notifier) Callback(ctx context.Context, cb NotifyCallbackFn) {
+func (n *notifier[Notice]) Callback(ctx context.Context, cb NotifyCallbackFn[Notice]) {
 	listenChan := n.Listener(ctx)
 
 	go func() {

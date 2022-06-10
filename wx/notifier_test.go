@@ -10,15 +10,17 @@ import (
 	"github.com/egustafson/werks/wx"
 )
 
+type NoticeT string
+
 const (
-	timeout = time.Millisecond
-	msg0    = "msg-0"
-	msg1    = "msg-1"
-	msg2    = "msg-2"
+	timeout         = time.Millisecond
+	msg0    NoticeT = "msg-0"
+	msg1    NoticeT = "msg-1"
+	msg2    NoticeT = "msg-2"
 )
 
 func TestNewNotifier(t *testing.T) {
-	n := wx.NewNotifier()
+	n := wx.NewNotifier[NoticeT]()
 	if assert.NotNil(t, n) {
 		// send to a notifier w/ zero listeners
 		n.Notify("test message")
@@ -27,7 +29,7 @@ func TestNewNotifier(t *testing.T) {
 }
 
 func TestListener(t *testing.T) {
-	n := wx.NewNotifier()
+	n := wx.NewNotifier[NoticeT]()
 
 	// send before listen - drops on the floor
 	n.Notify(msg0)
@@ -78,8 +80,8 @@ func TestListener(t *testing.T) {
 }
 
 func TestCallback(t *testing.T) {
-	n := wx.NewNotifier()
-	fixtureChan := make(chan wx.Notice)
+	n := wx.NewNotifier[NoticeT]()
+	fixtureChan := make(chan NoticeT)
 	fixture := &callbackFixture{out: fixtureChan}
 
 	n.Callback(context.Background(), fixture.callback)
@@ -104,9 +106,9 @@ func TestCallback(t *testing.T) {
 // --  test fixture for callbacks  --
 
 type callbackFixture struct {
-	out chan<- wx.Notice
+	out chan<- NoticeT
 }
 
-func (cb *callbackFixture) callback(notice wx.Notice) {
+func (cb *callbackFixture) callback(notice NoticeT) {
 	cb.out <- notice
 }
