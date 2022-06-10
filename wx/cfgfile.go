@@ -1,4 +1,4 @@
-package wutil
+package wx
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ type ConfigPaths struct {
 	UserConfigDir    string
 }
 
-func LocateConfig(basename string, opts ...ConfigPathsOption) string {
+func LocateConfigFile(basename string, opts ...ConfigPathsOption) string {
 
 	searchPath := ConfigSearchPath(basename, opts...)
 
