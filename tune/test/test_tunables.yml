@@ -1,0 +1,9 @@
+---
+string-key: value
+int-key: 123
+float-key: 1.234
+duration-key: 2m
+struct-key:
+  sub-key: key
+  sub-value: value
+...
