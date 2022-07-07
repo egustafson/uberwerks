@@ -2,6 +2,8 @@ package kv
 
 import (
 	"context"
+
+	"github.com/egustafson/werks/wx"
 )
 
 func Init() {}
@@ -15,17 +17,39 @@ type KV[T any] struct {
 	err       error
 }
 
+type EventType int
+
+const (
+	PutEvent EventType = iota
+	DelEvent
+)
+
+type Event[T any] struct {
+	EventType EventType
+	Kv        *KV[T]
+	PrevKV    *KV[T]
+}
+
+type Iterator[T any] interface {
+	HasNext() bool
+	GetNext() T
+}
+
+type WatchResponse[T any] struct {
+	Ev  *Event[T]
+	Err error
+}
+
 type Repo[T any] interface {
-	Get(ctx context.Context, k string) (KV[T], error)
-	GetPrefix(ctx context.Context, prefix string) (<-chan KV[T], error)
+	Keys() (Iterator[string], error)
+	HasKey(k string) (bool, error)
 
-	Del(ctx context.Context, k string) (count int, err error)
-	DelPrefix(ctx context.Context, prefix string) (count int, err error)
+	Get(k string) (KV[T], error)
+	Del(k string) (count int, err error)
+	Put(k string, v T) error
 
-	Put(ctx context.Context, k string, v T) error
-
-	Watch(ctx context.Context, k string) (<-chan KV[T], error)
-	WatchAll(ctx context.Context, prefix string) (<-chan KV[T], error)
+	Watch(ctx context.Context, k string) (wx.Notifier[WatchResponse[T]], error)
+	WatchPrefix(ctx context.Context, prefix string) (wx.Notifier[WatchResponse[T]], error)
 }
 
 //
