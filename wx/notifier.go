@@ -66,14 +66,14 @@ func (n *notifier[Notice]) Notify(notice Notice) {
 		case <-time.After(timeout):
 			// spin delivery out to a goroutine; avoid blocking.  Out
 			// of order delivery happens at this point
-			go func() {
+			go func(recv *notifyReceiver[Notice]) {
 				select {
 				case <-recv.ctx.Done():
 					return
 				case recv.ch <- notice:
 					// default: just deliver
 				}
-			}()
+			}(recv)
 		}
 	}
 }
