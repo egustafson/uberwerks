@@ -20,6 +20,9 @@ type AlarmerMixin struct {
 	AlarmList []Alarm
 }
 
+// static check: *AlarmerMixin isA Alarm
+var _ Alarmer = (*AlarmerMixin)(nil)
+
 func (a *AlarmerMixin) Alarming() bool {
 	for _, alarm := range a.AlarmList {
 		if alarm.Alarming() {

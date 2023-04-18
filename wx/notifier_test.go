@@ -80,18 +80,33 @@ func TestListener(t *testing.T) {
 }
 
 func TestCallback(t *testing.T) {
+	//responseMap := make(map[string]struct{})
+	responseMap := map[NoticeT]int{
+		msg0: 0, msg1: 1, msg2: 2,
+	}
+
 	n := wx.NewNotifier[NoticeT]()
 	fixtureChan := make(chan NoticeT)
 	fixture := &callbackFixture{out: fixtureChan}
 
 	n.Callback(context.Background(), fixture.callback)
-	n.Notify(msg0)
-	n.Notify(msg1)
-	n.Notify(msg2) // cause overflow: expect to work
+	for k, _ := range responseMap {
+		n.Notify(k)
+	}
+	// 	n.Notify(msg0)
+	// 	n.Notify(msg1) // cause overflow: expect to work
+	// 	n.Notify(msg2)
 
-	assert.Equal(t, msg0, <-fixtureChan)
-	assert.Equal(t, msg1, <-fixtureChan)
-	assert.Equal(t, msg2, <-fixtureChan)
+	for notice := range fixtureChan {
+		_, ok := responseMap[notice]
+		if assert.True(t, ok) {
+			delete(responseMap, notice)
+		}
+	}
+	assert.Len(t, responseMap, 0) // <- all notices delivered
+	// 	assert.Equal(t, msg0, <-fixtureChan)
+	// 	assert.Equal(t, msg1, <-fixtureChan)
+	// 	assert.Equal(t, msg2, <-fixtureChan)
 
 	n.Close()
 	n.Notify(msg0)

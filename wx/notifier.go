@@ -3,7 +3,6 @@ package wx
 import (
 	"context"
 	"sync"
-	"time"
 )
 
 type NotifyCallbackFn[Notice interface{}] func(notice Notice)
@@ -47,7 +46,6 @@ func (n *notifier[Notice]) Close() {
 }
 
 func (n *notifier[Notice]) Notify(notice Notice) {
-	const timeout = 50 * time.Microsecond
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
@@ -63,15 +61,23 @@ func (n *notifier[Notice]) Notify(notice Notice) {
 			delete(n.receivers, recv)
 		case recv.ch <- notice:
 			// default: just deliver
-		case <-time.After(timeout):
-			// spin delivery out to a goroutine; avoid blocking.  Out
-			// of order delivery happens at this point
+		default:
+			// Avoid blocking: spin delivery out to a goroutine; avoid
+			// blocking.  Out of order delivery may happen at this
+			// point.
 			go func(recv *notifyReceiver[Notice]) {
 				select {
+				// Guard against race that ctx is canceled before goroute starts
 				case <-recv.ctx.Done():
 					return
-				case recv.ch <- notice:
-					// default: just deliver
+				default:
+					// Guarantee: recv.ch is not closed
+					select {
+					case <-recv.ctx.Done():
+						return
+					case recv.ch <- notice:
+						// default: just deliver
+					}
 				}
 			}(recv)
 		}
