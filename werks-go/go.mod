@@ -1,4 +1,4 @@
-module github.com/egustafson/werks
+module github.com/egustafson/werks/werks-go
 
 go 1.18
 

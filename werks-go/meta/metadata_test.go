@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/egustafson/werks/meta"
+	"github.com/egustafson/werks/werks-go/meta"
 )
 
 func TestNewMetadata_empty(t *testing.T) {

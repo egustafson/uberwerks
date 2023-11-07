@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/egustafson/werks/wx"
+	"github.com/egustafson/werks/werks-go/wx"
 )
 
 type NoticeT string

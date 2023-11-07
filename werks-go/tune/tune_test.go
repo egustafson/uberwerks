@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"testing"
 
-	"github.com/egustafson/werks/tune"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/egustafson/werks/werks-go/tune"
 )
 
 //go:embed test/test_tunables.yml
