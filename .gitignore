@@ -1,5 +1,7 @@
 # .gitignore
 
+uberwerks.code-workspace
+
 # ================================================
 # Golang ignores (from GitHub)
 #
