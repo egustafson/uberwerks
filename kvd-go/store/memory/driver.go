@@ -25,10 +25,6 @@ func (drv *memStoreDriver) New(ctx context.Context, params map[string]string) (s
 	if !ok {
 		id = uuid.New().String()
 	}
-	store := &memStore{
-		id:    id,
-		ctx:   ctx,
-		store: make(map[string][]byte),
-	}
+	store := newMemStore(ctx, id)
 	return store, nil
 }

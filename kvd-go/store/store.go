@@ -3,9 +3,11 @@ package store
 import "context"
 
 type KeyValue struct {
-	Key string
-	Val string
-	Ver int
+	Key            string
+	Val            string
+	CreateRevision uint64
+	ModRevision    uint64
+	Version        uint64
 }
 
 type Kvs []KeyValue
@@ -25,7 +27,7 @@ type Event struct {
 
 type Store interface {
 	ID() string
-	Put(ctx context.Context, kv KeyValue) error
+	Put(ctx context.Context, key, value string) error
 	KeyRange(ctx context.Context, key, range_end string) ([]string, error)
 	GetRange(ctx context.Context, key, range_end string) (Kvs, error)
 	DelRange(ctx context.Context, key, range_end string) (Kvs, error)
