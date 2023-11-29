@@ -31,7 +31,7 @@ type Store interface {
 	KeyRange(ctx context.Context, key, range_end string) ([]string, error)
 	GetRange(ctx context.Context, key, range_end string) (Kvs, error)
 	DelRange(ctx context.Context, key, range_end string) (Kvs, error)
-	WatchRange(ctx context.Context, key, range_end string) (<-chan Event, error)
+	WatchRange(ctx context.Context, key, range_end string) (<-chan *Event, error)
 
 	Manager() any
 }

@@ -5,44 +5,25 @@ import (
 	"sync"
 
 	"github.com/egustafson/uberwerks/kvd-go/store"
-	"github.com/google/uuid"
 )
 
 type memStore struct {
-	id       string
-	ctx      context.Context
-	mutex    sync.RWMutex
-	revision uint64
-	store    map[string]store.KeyValue
-	watchers map[uuid.UUID]*watcher
-}
-
-type watcher struct {
-	id        uuid.UUID
-	ctx       context.Context
-	cancel    context.CancelFunc
-	lock      sync.Mutex
-	ch        chan store.Event
-	key       string
-	range_end string
+	id              string
+	ctx             context.Context
+	mutex           sync.RWMutex
+	revision        uint64
+	store           map[string]store.KeyValue
+	watchDispatcher *store.WatchDispatcher
 }
 
 func newMemStore(ctx context.Context, id string) *memStore {
 	st := &memStore{
-		id:       id,
-		ctx:      ctx,
-		revision: 0,
-		store:    make(map[string]store.KeyValue),
-		watchers: make(map[uuid.UUID]*watcher),
+		id:              id,
+		ctx:             ctx,
+		revision:        0,
+		store:           make(map[string]store.KeyValue),
+		watchDispatcher: store.NewWatchDispatcher(ctx),
 	}
-	go func(st *memStore) {
-		<-st.ctx.Done()
-		st.mutex.Lock()
-		defer st.mutex.Unlock()
-		for _, watcher := range st.watchers {
-			watcher.cancel()
-		}
-	}(st)
 	return st
 }
 
@@ -57,15 +38,29 @@ func (st *memStore) Put(ctx context.Context, key, value string) error {
 	st.mutex.Lock()
 	defer st.mutex.Unlock()
 	st.revision += 1
-	kv, ok := st.store[key]
+	old_kv, ok := st.store[key]
 	if !ok {
-		kv.Key = key
+		old_kv.Key = key
+		// old_kv.Version == 0 => it didn't exist
+	}
+	kv := store.KeyValue{
+		Key:            key,
+		Val:            value,
+		CreateRevision: old_kv.CreateRevision,
+		ModRevision:    st.revision,
+		Version:        old_kv.Version + 1,
+	}
+	if old_kv.CreateRevision == 0 {
 		kv.CreateRevision = st.revision
 	}
-	kv.Val = value
-	kv.Version += 1
-	kv.ModRevision = st.revision
 	st.store[key] = kv
+
+	st.watchDispatcher.SendEvent(&store.Event{
+		Type:   store.PUT,
+		Kv:     kv,
+		PrevKv: old_kv,
+	})
+
 	return nil
 }
 
@@ -115,32 +110,23 @@ func (st *memStore) DelRange(ctx context.Context, key, range_end string) (store.
 	if len(kvs) > 0 {
 		st.revision += 1
 	}
+
+	for _, kv := range kvs {
+		st.watchDispatcher.SendEvent(&store.Event{
+			Type:   store.DEL,
+			Kv:     store.KeyValue{Key: kv.Key},
+			PrevKv: kv,
+		})
+	}
+
 	return kvs, nil
 }
 
-func (st *memStore) WatchRange(ctx context.Context, key, range_end string) (<-chan store.Event, error) {
+func (st *memStore) WatchRange(ctx context.Context, key, range_end string) (<-chan *store.Event, error) {
 	if st.ctx.Err() != nil {
 		return nil, st.ctx.Err()
 	}
-	ctx, cancel := context.WithCancel(ctx)
-	watch := &watcher{
-		id:        uuid.New(),
-		ctx:       ctx,
-		cancel:    cancel,
-		ch:        make(chan store.Event, 2),
-		key:       key,
-		range_end: range_end,
-	}
-	st.mutex.Lock()
-	defer st.mutex.Unlock()
-	st.watchers[watch.id] = watch
-	go func(watcher *watcher) {
-		<-watcher.ctx.Done()
-		watcher.lock.Lock()
-		defer watcher.lock.Unlock()
-		close(watcher.ch)
-	}(watch)
-	return watch.ch, nil
+	return st.watchDispatcher.NewWatcher(ctx, key, range_end), nil
 }
 
 func (st *memStore) Manager() any {
