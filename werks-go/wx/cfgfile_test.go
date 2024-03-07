@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/egustafson/werks/werks-go/wx"
+	"github.com/egustafson/uberwerks/werks-go/wx"
 )
 
 // ExampleFindConfig demonstrates locating a configuration file for a

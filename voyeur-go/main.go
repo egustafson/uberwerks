@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/werks/voyeur-go/cmd"
+	"github.com/egustafson/uberwerks/voyeur-go/cmd"
 )
 
 // populated by linker at build time

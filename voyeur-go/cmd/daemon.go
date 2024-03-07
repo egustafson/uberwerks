@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/werks/voyeur-go/voyeurd"
+
+	"github.com/egustafson/uberwerks/voyeur-go/voyeurd"
 )
 
 var daemonCmd = &cobra.Command{

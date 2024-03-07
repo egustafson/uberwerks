@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/egustafson/werks/werks-go/tune"
+	"github.com/egustafson/uberwerks/werks-go/tune"
 )
 
 //go:embed test/test_tunables.yml

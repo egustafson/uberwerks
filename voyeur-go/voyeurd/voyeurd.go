@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/werks/voyeur-go/agent"
+	"github.com/egustafson/uberwerks/voyeur-go/agent"
 )
 
 func Run() error {

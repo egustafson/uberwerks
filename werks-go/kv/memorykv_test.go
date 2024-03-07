@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/egustafson/werks/werks-go/kv"
+	"github.com/egustafson/uberwerks/werks-go/kv"
 )
 
 func TestMemoryKVTestSuite(t *testing.T) {
