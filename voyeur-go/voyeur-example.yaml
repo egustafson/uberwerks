@@ -1,0 +1,22 @@
+client:
+  # details a client needs
+
+daemon:
+
+  agent:
+    tribe-id: "stoneglen"
+    devel-mode: false
+    rest:
+      port: 3100
+      tls:
+        cert: ${VOYEURD_CERT}
+        key:  ${VOYEURD_KEY}
+    mqtt:
+      port: 3109
+      tls:
+        ca:   ${VOYEURD_CA}
+        cert: ${VOYEURD_CERT}
+        key:  ${VOYEURD_KEY}
+
+  proxy-mo:
+    
