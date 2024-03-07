@@ -1,6 +1,7 @@
 # .gitignore
 
-uberwerks.code-workspace
+# ingore workspace definitions for vscode
+*.code-workspace
 
 # ================================================
 # Golang ignores (from GitHub)
