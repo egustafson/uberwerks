@@ -1,4 +1,4 @@
-package wx
+package cfg
 
 import (
 	"fmt"

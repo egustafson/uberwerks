@@ -1,4 +1,4 @@
-package config
+package cm
 
 type ConfigItem interface {
 	Key() string // should really be a UUID

@@ -1,4 +1,4 @@
-package du_test
+package dx_test
 
 import (
 	"errors"
@@ -8,25 +8,24 @@ import (
 	"testing"
 	"time"
 
+	"github.com/egustafson/uberwerks/werks-go/dx"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/egustafson/uberwerks/werks-go/du"
 )
 
 func ExampleInternal() {
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0)
-	du.Internal("demo-internal")
+	dx.Internal("demo-internal")
 	// Output: [ERROR]   demo-internal [err-file=/home/ericg/voyeur-go/mx/internal_test.go:19][err-func=github.com/werks/voyeur-go/mx_test.ExampleInternal]
 }
 
 func TestInternal(t *testing.T) {
 	cause := errors.New("stub-causing-error")
-	e := du.Internal("test-internal-error", du.WithCause(cause), du.WithMeta("test-meta", "value"))
+	e := dx.Internal("test-internal-error", dx.WithCause(cause), dx.WithMeta("test-meta", "value"))
 
 	assert.Equal(t, "test-internal-error", e.Error())
 	assert.True(t, errors.Is(e, cause))
-	if ie, ok := e.(*du.InternalError); assert.True(t, ok) {
+	if ie, ok := e.(*dx.InternalError); assert.True(t, ok) {
 		assert.True(t, ie.When.Before(time.Now()))
 		value, ok := ie.Metadata["test-meta"]
 		if assert.True(t, ok) {
@@ -37,12 +36,12 @@ func TestInternal(t *testing.T) {
 
 type mockInternalHandler struct{}
 
-func (h *mockInternalHandler) Handle(ie *du.InternalError) {
+func (h *mockInternalHandler) Handle(ie *dx.InternalError) {
 	fmt.Println(ie.Message)
 }
 
 func ExampleRegisterInternalHandler() {
-	du.RegisterInternalHandler(&mockInternalHandler{})
-	du.Internal("mock-handler-internal-error")
+	dx.RegisterInternalHandler(&mockInternalHandler{})
+	dx.Internal("mock-handler-internal-error")
 	// Output: mock-handler-internal-error
 }

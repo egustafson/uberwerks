@@ -1,4 +1,4 @@
-package du
+package dx
 
 type errorOptions struct {
 	Cause    error

@@ -1,26 +1,24 @@
-package wx_test
+package cfg_test
 
 import (
 	"fmt"
 	"os"
 	"testing"
 
+	"github.com/egustafson/uberwerks/werks-go/cfg"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/egustafson/uberwerks/werks-go/wx"
 )
 
 // ExampleFindConfig demonstrates locating a configuration file for a
 // program named 'appctl'
 func ExampleLocateConfigFile() {
-	_ = wx.LocateConfigFile("app-name")
+	_ = cfg.LocateConfigFile("app-name")
 }
 
 func TestLocateConfigFile(t *testing.T) {
 	//
 	// TODO
 	//
-	return
 }
 
 func TestSimpleConfigSearchPath(t *testing.T) {
@@ -28,7 +26,7 @@ func TestSimpleConfigSearchPath(t *testing.T) {
 	userConfigDir, _ := os.UserConfigDir()
 	assert.True(t, len(userConfigDir) > 0) // guard against an empty path
 
-	searchPath := wx.ConfigSearchPath(basename)
+	searchPath := cfg.ConfigSearchPath(basename)
 	if assert.True(t, len(searchPath) == 2) {
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s.yml", userConfigDir, basename, basename), searchPath[0])
 		assert.Equal(t, fmt.Sprintf("%s.yml", basename), searchPath[1])
@@ -41,8 +39,8 @@ func TestProfileConfigSearchPath(t *testing.T) {
 	userConfigDir, _ := os.UserConfigDir()
 	assert.True(t, len(userConfigDir) > 0) // guard against an empty path
 
-	searchPath := wx.ConfigSearchPath(basename,
-		wx.WithProfile(profile))
+	searchPath := cfg.ConfigSearchPath(basename,
+		cfg.WithProfile(profile))
 	if assert.True(t, len(searchPath) == 3) {
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s/%s.yml", userConfigDir, basename, profile, basename), searchPath[0])
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s-%s.yml", userConfigDir, basename, basename, profile), searchPath[1])
@@ -57,9 +55,9 @@ func TestProfileAndExtensionConfigSearchPath(t *testing.T) {
 	userConfigDir, _ := os.UserConfigDir()
 	assert.True(t, len(userConfigDir) > 0) // guard against an empty path
 
-	searchPath := wx.ConfigSearchPath(basename,
-		wx.WithProfile(profile),
-		wx.WithProfileExtension(profileExt))
+	searchPath := cfg.ConfigSearchPath(basename,
+		cfg.WithProfile(profile),
+		cfg.WithProfileExtension(profileExt))
 	if assert.True(t, len(searchPath) == 3) {
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s/%s-%s.yml", userConfigDir, basename, profile, basename, profileExt), searchPath[0])
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s-%s-%s.yml", userConfigDir, basename, basename, profile, profileExt), searchPath[1])
@@ -73,7 +71,7 @@ func TestFileExtensionConfigSearchPath(t *testing.T) {
 	userConfigDir, _ := os.UserConfigDir()
 	assert.True(t, len(userConfigDir) > 0) // guard against an empty path
 
-	searchPath := wx.ConfigSearchPath(basename, wx.WithFileExtension(fileExt))
+	searchPath := cfg.ConfigSearchPath(basename, cfg.WithFileExtension(fileExt))
 	if assert.True(t, len(searchPath) == 2) {
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s.%s", userConfigDir, basename, basename, fileExt), searchPath[0])
 		assert.Equal(t, fmt.Sprintf("%s.%s", basename, fileExt), searchPath[1])
@@ -86,7 +84,7 @@ func TestFileBasenameConfigSearchPath(t *testing.T) {
 	userConfigDir, _ := os.UserConfigDir()
 	assert.True(t, len(userConfigDir) > 0) // guard against an empty path
 
-	searchPath := wx.ConfigSearchPath(basename, wx.WithConfigFileBasename(fileBasename))
+	searchPath := cfg.ConfigSearchPath(basename, cfg.WithConfigFileBasename(fileBasename))
 	if assert.True(t, len(searchPath) == 2) {
 		assert.Equal(t, fmt.Sprintf("%s/%s/%s.yml", userConfigDir, basename, fileBasename), searchPath[0])
 		assert.Equal(t, fmt.Sprintf("%s.yml", fileBasename), searchPath[1])
