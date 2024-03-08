@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/egustafson/uberwerks/jsondb-go/jsondbd"
 	"github.com/spf13/cobra"
+
+	"github.com/egustafson/uberwerks/jsondb-go/server"
 )
 
 var daemonCmd = &cobra.Command{
@@ -17,6 +18,6 @@ func init() {
 
 func doDaemon(cmd *cobra.Command, args []string) error {
 
-	err := jsondbd.Run()
+	err := server.Start()
 	return err
 }

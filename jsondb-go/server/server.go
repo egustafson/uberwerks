@@ -1,5 +1,5 @@
 // Package jsondb implements the JSON-DB daemon.
-package jsondbd
+package server
 
 import (
 	"context"
@@ -8,9 +8,11 @@ import (
 	"syscall"
 
 	"github.com/Masterminds/log-go"
+
+	"github.com/egustafson/uberwerks/jsondb-go/server/api"
 )
 
-func Run() error {
+func Start() error {
 
 	//initLogging()  // TODO:  belongs in another package, ?? mx possibly?
 
@@ -27,7 +29,8 @@ func Run() error {
 	}()
 
 	// TODO: remainder of daemon and api start-up
-	_ = ctx
 
+	api.Run(ctx)
+	<-ctx.Done() // block until the context is canceled
 	return nil
 }
