@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/egustafson/uberwerks/jsondb-go/server"
+	"github.com/egustafson/uberwerks/jsondb-go/server/config"
 )
 
 var daemonCmd = &cobra.Command{
@@ -18,6 +19,14 @@ func init() {
 
 func doDaemon(cmd *cobra.Command, args []string) error {
 
-	err := server.Start()
+	config := &config.Config{
+		//
+		// TODO: dynamically load/populate config
+		//
+		DSN:  ":memory:",
+		Port: 8080,
+	}
+
+	err := server.Start(config)
 	return err
 }

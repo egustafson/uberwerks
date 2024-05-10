@@ -10,9 +10,10 @@ import (
 	"github.com/Masterminds/log-go"
 
 	"github.com/egustafson/uberwerks/jsondb-go/server/api"
+	"github.com/egustafson/uberwerks/jsondb-go/server/config"
 )
 
-func Start() error {
+func Start(config *config.Config) error {
 
 	//initLogging()  // TODO:  belongs in another package, ?? mx possibly?
 
@@ -30,7 +31,7 @@ func Start() error {
 
 	// TODO: remainder of daemon and api start-up
 
-	api.Run(ctx)
+	api.Run(ctx, config)
 	<-ctx.Done() // block until the context is canceled
 	return nil
 }

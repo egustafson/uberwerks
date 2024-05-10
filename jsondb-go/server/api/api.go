@@ -2,26 +2,29 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/Masterminds/log-go"
 	"github.com/gin-gonic/gin"
+
+	"github.com/egustafson/uberwerks/jsondb-go/server/config"
 )
 
-func Run(ctx context.Context) (err error) {
+func Run(ctx context.Context, config *config.Config) (err error) {
 	router := gin.Default()
-	v0 := router.Group("/v0")
-	v0.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	v0 := router.Group("/jsondb/v0")
+	jdbAPI, err := InitJdbAPI(config, v0)
+	if err != nil {
+		return err
+	}
 
 	s := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: router,
 	}
+	log.Infof("listening on port %d", config.Port)
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		<-ctx.Done() // block until context canceled
@@ -41,6 +44,7 @@ func Run(ctx context.Context) (err error) {
 	}
 
 	<-idleConnsClosed
+	jdbAPI.Close()
 	log.Info("http server shutdown complete")
 	return
 }
