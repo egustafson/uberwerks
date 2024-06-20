@@ -14,6 +14,13 @@ import (
 
 func Run(ctx context.Context, config *config.Config) (err error) {
 	router := gin.Default()
+
+	h0 := router.Group("/health")
+	healthAPI, err := initHealth(config, h0)
+	if err != nil {
+		return err
+	}
+
 	v0 := router.Group("/jsondb/v0")
 	jdbAPI, err := InitJdbAPI(config, v0)
 	if err != nil {
@@ -45,6 +52,7 @@ func Run(ctx context.Context, config *config.Config) (err error) {
 
 	<-idleConnsClosed
 	jdbAPI.Close()
+	healthAPI.Close()
 	log.Info("http server shutdown complete")
 	return
 }
