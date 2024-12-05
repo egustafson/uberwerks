@@ -3,19 +3,17 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/Masterminds/log-go"
 
 	"github.com/egustafson/uberwerks/jsondb-go/server/api"
 	"github.com/egustafson/uberwerks/jsondb-go/server/config"
 )
 
-func Start(config *config.Config) error {
-
-	//initLogging()  // TODO:  belongs in another package, ?? mx possibly?
+func Start(args []string, flags config.Flags) (err error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -25,13 +23,19 @@ func Start(config *config.Config) error {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-		log.Infof("received signal: %s", sig.String())
+		slog.Info(fmt.Sprintf("received signal: %s", sig.String()))
 		cancel()
 	}()
 
+	var cfg *config.Config
+	if cfg, ctx, err = config.InitConfig(ctx, args, flags); err != nil {
+		return
+	}
+	initServerLogging(cfg)
+
 	// TODO: remainder of daemon and api start-up
 
-	api.Run(ctx, config)
+	api.Run(ctx, cfg)
 	<-ctx.Done() // block until the context is canceled
 	return nil
 }

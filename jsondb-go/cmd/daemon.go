@@ -8,9 +8,10 @@ import (
 )
 
 var daemonCmd = &cobra.Command{
-	Use:   "daemon",
-	Short: "start as a daemon",
-	RunE:  doDaemon,
+	Use:                "daemon",
+	Short:              "start as a daemon",
+	DisableFlagParsing: true, // flags parsed in server
+	RunE:               doDaemon,
 }
 
 func init() {
@@ -18,15 +19,8 @@ func init() {
 }
 
 func doDaemon(cmd *cobra.Command, args []string) error {
-
-	config := &config.Config{
-		//
-		// TODO: dynamically load/populate config
-		//
-		DSN:  ":memory:",
-		Port: 8080,
+	flags := config.Flags{
+		Verbose: verboseFlag,
 	}
-
-	err := server.Start(config)
-	return err
+	return server.Start(args, flags)
 }

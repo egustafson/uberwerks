@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/Masterminds/log-go"
 	"github.com/gin-gonic/gin"
 
 	"github.com/egustafson/uberwerks/jsondb-go/server/config"
@@ -31,7 +31,7 @@ func Run(ctx context.Context, config *config.Config) (err error) {
 		Addr:    fmt.Sprintf(":%d", config.Port),
 		Handler: router,
 	}
-	log.Infof("listening on port %d", config.Port)
+	slog.Info("listening", slog.Int("port", config.Port))
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		<-ctx.Done() // block until context canceled
@@ -39,13 +39,13 @@ func Run(ctx context.Context, config *config.Config) (err error) {
 		timeoutCtx, cancel := context.WithTimeout(context.Background(), timeoutTime)
 		defer cancel()
 		if err := s.Shutdown(timeoutCtx); err != nil {
-			log.Warnf("http server Shutdown: %v", err)
+			slog.Warn("http server Shutdown", slog.Any("error", err))
 			s.Close()
 		}
 		close(idleConnsClosed)
 	}()
 	if err = s.ListenAndServe(); err != http.ErrServerClosed {
-		log.Errorf("http server ListenAndServe: %v", err)
+		slog.Error("http server ListenAndServe", slog.Any("error", err))
 	} else {
 		err = nil // don't report the server closing, it's normal
 	}
@@ -53,6 +53,6 @@ func Run(ctx context.Context, config *config.Config) (err error) {
 	<-idleConnsClosed
 	jdbAPI.Close()
 	healthAPI.Close()
-	log.Info("http server shutdown complete")
+	slog.Info("http server shutdown complete")
 	return
 }
