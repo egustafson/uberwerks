@@ -16,7 +16,7 @@ func ExampleInternal() {
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0)
 	dx.Internal("demo-internal")
-	// Output: [ERROR]   demo-internal [err-file=/home/ericg/voyeur-go/mx/internal_test.go:19][err-func=github.com/werks/voyeur-go/mx_test.ExampleInternal]
+	// Output: ERROR demo-internal metadata.err-file=/home/ericg/voyeur-go/mx/internal_test.go:19 metadata.err-func=github.com/werks/voyeur-go/mx_test.ExampleInternal
 }
 
 func TestInternal(t *testing.T) {

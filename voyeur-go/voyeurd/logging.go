@@ -1,24 +1,29 @@
 package voyeurd
 
 import (
-	"github.com/Masterminds/log-go"
-	lgrs "github.com/Masterminds/log-go/impl/logrus"
-	"github.com/sirupsen/logrus"
+	"log/slog"
+	"os"
 )
 
-func initLogging() log.Logger {
+func initLogging() *slog.Logger {
 	var devFlag = true // evenutally pass in
 
-	var lg = logrus.New()
+	logWr := os.Stdout
+	level := slog.LevelInfo
+
+	var logger *slog.Logger
 	if devFlag {
-		lg.Level = logrus.DebugLevel
-		lg.SetFormatter(&logrus.TextFormatter{})
+		level = slog.LevelDebug
+		logger = slog.New(slog.NewTextHandler(logWr, &slog.HandlerOptions{
+			Level: level,
+		}))
 	} else {
-		lg.Level = logrus.InfoLevel // logrus default
-		lg.SetFormatter(&logrus.JSONFormatter{})
+		logger = slog.New(slog.NewJSONHandler(logWr, &slog.HandlerOptions{
+			Level: level,
+		}))
 	}
 
-	log.Current = lgrs.New(lg)
+	slog.SetDefault(logger)
 
-	return log.Current
+	return logger
 }

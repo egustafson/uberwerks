@@ -2,20 +2,19 @@ package agent
 
 import (
 	"context"
+	"log/slog"
 	"time"
-
-	"github.com/Masterminds/log-go"
 )
 
 type Agent struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	log    log.Logger
+	log    *slog.Logger
 }
 
 type AgentOps struct {
 	timeout time.Duration
-	logger  log.Logger
+	logger  *slog.Logger
 }
 
 type AgentOption func(*AgentOps)
@@ -26,7 +25,7 @@ func WithTimeout(t time.Duration) AgentOption {
 	}
 }
 
-func WithLogger(l log.Logger) AgentOption {
+func WithLogger(l *slog.Logger) AgentOption {
 	return func(o *AgentOps) {
 		o.logger = l
 	}
@@ -50,7 +49,7 @@ func InitAgent(opts ...AgentOption) *Agent {
 		log: ops.logger,
 	}
 	if a.log == nil {
-		a.log = log.Current // just use the Logger as configured in the log package
+		a.log = slog.Default() // just use the Logger as configured in the log package
 	}
 	return a
 }

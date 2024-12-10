@@ -2,10 +2,9 @@ package dx
 
 import (
 	"fmt"
+	"log/slog"
 	"runtime"
 	"time"
-
-	"github.com/Masterminds/log-go"
 )
 
 type InternalHandler interface {
@@ -81,11 +80,11 @@ func NewBootstrapInternalHandler() InternalHandler {
 }
 
 func (h *bootstrapInternalHandler) Handle(e *InternalError) {
-	fields := make(log.Fields)
+	fields := make([]slog.Attr, 0, len(e.Metadata))
 	for k, v := range e.Metadata {
-		fields[k] = v
+		fields = append(fields, slog.String(k, v))
 	}
-	log.Errorw(e.Message, fields)
+	slog.Error(e.Message, "metadata", slog.GroupValue(fields...))
 }
 
 // RegisterInternalHandler (re)sets the internal error handler.  (Dependency

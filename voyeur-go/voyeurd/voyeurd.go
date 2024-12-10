@@ -2,6 +2,7 @@ package voyeurd
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,7 +24,7 @@ func Run() error {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-		logger.Infof("received signal: %s", sig.String())
+		logger.Info("received signal", slog.String("signal", sig.String()))
 		cancel() // ==> shutdown the agent
 	}()
 
@@ -33,7 +34,7 @@ func Run() error {
 	err := agent.AwaitShutdown()
 	logger.Info("voyeur agent shutdown")
 	if err != nil {
-		logger.Warnf("voyeur agent exited with error: %w", err)
+		logger.Warn("voyeur agent exited with error", slog.String("error", err.Error()))
 	}
 
 	return err
